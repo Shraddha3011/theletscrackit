@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
 import org.springframework.security.core.Authentication;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+
 import java.util.Map;
 
 @RestController
@@ -43,13 +45,16 @@ public class AuthController {
 
     private final JwtUtil jwtUtil;
 
-    // SIGNUP
     @PostMapping("/signup")
     public ResponseEntity<?> signup(
             @Valid @RequestBody RegisterRequest request
     ) {
 
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (
+                userRepository.existsByEmail(
+                        request.getEmail()
+                )
+        ) {
 
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
@@ -61,28 +66,19 @@ public class AuthController {
                     );
         }
 
-        String fullName =
-                firstPresent(
-                        request.getFullName(),
-                        request.getUsername(),
-                        request.getEmail()
-                );
-
-        String username =
-                request.getUsername() != null &&
-                        !request.getUsername().isBlank()
-
-                        ? request.getUsername()
-
-                        : request.getEmail().split("@")[0];
-
         User user = User.builder()
 
-                .username(username)
+                .fullName(
+                        request.getFullName()
+                )
 
-                .fullName(fullName)
+                .username(
+                        request.getUsername()
+                )
 
-                .email(request.getEmail())
+                .email(
+                        request.getEmail()
+                )
 
                 .password(
                         passwordEncoder.encode(
@@ -110,15 +106,13 @@ public class AuthController {
                 );
     }
 
-    // LOGIN
     @PostMapping("/login")
-    public AuthResponse login(
+    public ResponseEntity<?> login(
             @Valid @RequestBody LoginRequest request
     ) {
 
         Authentication authentication =
                 authenticationManager.authenticate(
-
                         new UsernamePasswordAuthenticationToken(
                                 request.getEmail(),
                                 request.getPassword()
@@ -127,7 +121,7 @@ public class AuthController {
 
         User user =
                 userRepository.findByEmail(
-                        authentication.getName()
+                        request.getEmail()
                 ).orElseThrow();
 
         String token =
@@ -135,67 +129,66 @@ public class AuthController {
                         user.getEmail()
                 );
 
-        return toAuthResponse(user, token);
+        AuthResponse response =
+                AuthResponse.builder()
+                        .token(token)
+                        .tokenType("Bearer")
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .fullName(user.getFullName())
+                        .role(user.getRole().name())
+                        .xpPoints(user.getXpPoints())
+                        .streak(user.getStreak())
+                        .build();
+
+        return ResponseEntity.ok(response);
     }
 
-    // CURRENT USER
     @GetMapping("/me")
-    public AuthResponse me(
-            Principal principal
-    ) {
-
-        User user =
-                userRepository.findByEmail(
-                        principal.getName()
-                ).orElseThrow();
-
-        return toAuthResponse(user, null);
-    }
-
-    // RESPONSE FORMAT
-    private AuthResponse toAuthResponse(
-            User user,
-            String token
-    ) {
-
-        return AuthResponse.builder()
-
-                .token(token)
-
-                .tokenType("Bearer")
-
-                .id(user.getId())
-
-                .username(user.getUsername())
-
-                .email(user.getEmail())
-
-                .fullName(user.getFullName())
-
-                .avatarUrl(user.getAvatarUrl())
-
-                .role(user.getRole().name())
-
-                .xpPoints(user.getXpPoints())
-
-                .streak(user.getStreak())
-
-                .build();
-    }
-
-    // UTILITY
-    private String firstPresent(
-            String... values
-    ) {
-
-        for (String value : values) {
-
-            if (value != null && !value.isBlank()) {
-
-                return value;
-            }
+    public ResponseEntity<?> me(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Unauthorized"));
         }
 
-        return "Learner";
+        String name = principal.getName(); // could be "admin" or email
+
+        User user = userRepository.findByEmail(name)
+                .or(() -> userRepository.findByUsername(name)) // ✅ fallback
+                .orElse(null);
+
+        if (user == null) {
+
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(
+                            Map.of(
+                                    "message",
+                                    "User not found"
+                            )
+                    );
+        }
+
+        AuthResponse response =
+                AuthResponse.builder()
+
+                        .id(user.getId())
+
+                        .username(user.getUsername())
+
+                        .email(user.getEmail())
+
+                        .fullName(user.getFullName())
+
+                        .role(user.getRole().name())
+
+                        .xpPoints(user.getXpPoints())
+
+                        .streak(user.getStreak())
+
+                        .build();
+
+        return ResponseEntity.ok(response);
     }
 }
