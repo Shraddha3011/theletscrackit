@@ -249,27 +249,27 @@ public class DataSeeder implements CommandLineRunner {
 
     private void seedJavaCourse() {
 
-        if (courseRepository.count() > 0) {
-            return;
-        }
-
     /* =====================================================
        JAVA COURSE
     ===================================================== */
 
-        Course javaCourse = courseRepository.save(
+        Course javaCourse = courseRepository
+                .findBySlug("java")
+                .orElseGet(() ->
 
-                Course.builder()
-                        .title("Java")
-                        .slug("java")
-                        .description(
-                                "Master Java through cinematic runtime learning."
+                        courseRepository.save(
+
+                                Course.builder()
+                                        .title("Java")
+                                        .slug("java")
+                                        .description(
+                                                "Master Java through cinematic runtime learning."
+                                        )
+                                        .icon("☕")
+                                        .color("#06d96e")
+                                        .build()
                         )
-                        .icon("☕")
-                        .color("#06d96e")
-                        .build()
-        );
-
+                );
     /* =====================================================
        MODULE 1 — FUNDAMENTALS
     ===================================================== */
@@ -602,18 +602,23 @@ public class DataSeeder implements CommandLineRunner {
        DSA COURSE
     ===================================================== */
 
-        Course dsaCourse = courseRepository.save(
+        Course dsaCourse = courseRepository
+                .findBySlug("dsa")
+                .orElseGet(() ->
 
-                Course.builder()
-                        .title("DSA")
-                        .slug("dsa")
-                        .description(
-                                "Master problem solving and data structures visually."
+                        courseRepository.save(
+
+                                Course.builder()
+                                        .title("DSA")
+                                        .slug("dsa")
+                                        .description(
+                                                "Master problem solving and data structures visually."
+                                        )
+                                        .icon("🧠")
+                                        .color("#8b5cf6")
+                                        .build()
                         )
-                        .icon("🧠")
-                        .color("#8b5cf6")
-                        .build()
-        );
+                );
 
         Module dsaModule = moduleRepository.save(
 
@@ -636,18 +641,23 @@ public class DataSeeder implements CommandLineRunner {
        REACT COURSE
     ===================================================== */
 
-        Course reactCourse = courseRepository.save(
+        Course reactCourse = courseRepository
+                .findBySlug("react")
+                .orElseGet(() ->
 
-                Course.builder()
-                        .title("React")
-                        .slug("react")
-                        .description(
-                                "Build cinematic frontend applications with React."
+                        courseRepository.save(
+
+                                Course.builder()
+                                        .title("React")
+                                        .slug("react")
+                                        .description(
+                                                "Build cinematic frontend applications with React."
+                                        )
+                                        .icon("⚛️")
+                                        .color("#06b6d4")
+                                        .build()
                         )
-                        .icon("⚛️")
-                        .color("#06b6d4")
-                        .build()
-        );
+                );
 
         Module reactModule = moduleRepository.save(
 
@@ -670,18 +680,23 @@ public class DataSeeder implements CommandLineRunner {
        SPRING BOOT COURSE
     ===================================================== */
 
-        Course springCourse = courseRepository.save(
+        Course springCourse = courseRepository
+                .findBySlug("spring-boot")
+                .orElseGet(() ->
 
-                Course.builder()
-                        .title("Spring Boot")
-                        .slug("spring-boot")
-                        .description(
-                                "Learn backend architecture with Spring Boot."
+                        courseRepository.save(
+
+                                Course.builder()
+                                        .title("Spring Boot")
+                                        .slug("spring-boot")
+                                        .description(
+                                                "Learn backend architecture with Spring Boot."
+                                        )
+                                        .icon("🍃")
+                                        .color("#22c55e")
+                                        .build()
                         )
-                        .icon("🍃")
-                        .color("#22c55e")
-                        .build()
-        );
+                );
 
         Module springModule = moduleRepository.save(
 
@@ -708,6 +723,10 @@ public class DataSeeder implements CommandLineRunner {
             int order
     ) {
 
+        if (lessonRepository.existsBySlug(slug)) {
+            return;
+        }
+
         Lesson lesson = lessonRepository.save(
 
                 Lesson.builder()
@@ -726,11 +745,11 @@ public class DataSeeder implements CommandLineRunner {
                         .type(BlockType.TEXT)
                         .displayOrder(1)
                         .data("""
-                    {
-                      "content":
-                      "This lesson contains cinematic runtime explanations and interactive learning."
-                    }
-                    """)
+                {
+                  "content":
+                  "This lesson contains cinematic runtime explanations and interactive learning."
+                }
+                """)
                         .build()
         );
 
@@ -741,13 +760,13 @@ public class DataSeeder implements CommandLineRunner {
                         .type(BlockType.CODE)
                         .displayOrder(2)
                         .data("""
-                    {
-                      "language": "java",
+                {
+                  "language": "java",
 
-                      "code":
-                      "System.out.println(\\"Lets Crack It\\");"
-                    }
-                    """)
+                  "code":
+                  "System.out.println(\\"Lets Crack It\\");"
+                }
+                """)
                         .build()
         );
 
@@ -758,23 +777,23 @@ public class DataSeeder implements CommandLineRunner {
                         .type(BlockType.QUIZ)
                         .displayOrder(3)
                         .data("""
-                    {
-                      "question":
-                      "What is Java?",
+                {
+                  "question":
+                  "What is Java?",
 
-                      "options": [
-                        "Programming Language",
-                        "Database",
-                        "Browser",
-                        "Operating System"
-                      ],
+                  "options": [
+                    "Programming Language",
+                    "Database",
+                    "Browser",
+                    "Operating System"
+                  ],
 
-                      "correctAnswer": 0,
+                  "correctAnswer": 0,
 
-                      "explanation":
-                      "Java is an object oriented programming language."
-                    }
-                    """)
+                  "explanation":
+                  "Java is an object oriented programming language."
+                }
+                """)
                         .build()
         );
 
@@ -785,23 +804,27 @@ public class DataSeeder implements CommandLineRunner {
                         .type(BlockType.TASK)
                         .displayOrder(4)
                         .data("""
-                    {
-                      "title": "Build something tiny",
-                      "brief": "Use this concept immediately in a mini project step.",
-                      "goal": "Write a small program that proves you understood the lesson.",
-                      "steps": [
-                        "Recreate the example without looking.",
-                        "Change the input values.",
-                        "Explain what changed in output and memory."
-                      ],
-                      "starterCode": "public class Main {\\n  public static void main(String[] args) {\\n    System.out.println(\\"Lets Crack IT\\");\\n  }\\n}",
-                      "projectConnection": "This becomes one brick in your Java console toolkit project."
-                    }
-                    """)
+                {
+                  "title": "Build something tiny",
+                  "brief": "Use this concept immediately in a mini project step.",
+                  "goal": "Write a small program that proves you understood the lesson.",
+                  "steps": [
+                    "Recreate the example without looking.",
+                    "Change the input values.",
+                    "Explain what changed in output and memory."
+                  ],
+                  "starterCode": "public class Main {\\n  public static void main(String[] args) {\\n    System.out.println(\\"Lets Crack IT\\");\\n  }\\n}",
+                  "projectConnection": "This becomes one brick in your Java console toolkit project."
+                }
+                """)
                         .build()
         );
     }
     private void createStackVsHeapLesson(Module module) {
+
+        if (lessonRepository.existsBySlug("stack-vs-heap")) {
+            return;
+        }
 
         Lesson lesson = lessonRepository.save(
 
@@ -824,10 +847,10 @@ public class DataSeeder implements CommandLineRunner {
                         .displayOrder(1)
 
                         .data("""
-                {
-                  "content":
-                  "Java stores references inside stack memory while objects are stored inside heap memory dynamically."
-                }
+            {
+              "content":
+              "Java stores references inside stack memory while objects are stored inside heap memory dynamically."
+            }
             """)
 
                         .build()
@@ -841,12 +864,12 @@ public class DataSeeder implements CommandLineRunner {
                         .displayOrder(2)
 
                         .data("""
-                {
-                  "language": "java",
+            {
+              "language": "java",
 
-                  "code":
-                  "User user = new User();"
-                }
+              "code":
+              "User user = new User();"
+            }
             """)
 
                         .build()
@@ -863,79 +886,79 @@ public class DataSeeder implements CommandLineRunner {
                         .displayOrder(3)
 
                         .data("""
+    {
+      "title": "Stack vs Heap Runtime",
+
+      "steps": [
+
         {
-          "title": "Stack vs Heap Runtime",
+          "id": 1,
 
-          "steps": [
+          "title": "Program Starts",
 
-            {
-              "id": 1,
+          "code":
+          "public static void main(String[] args)",
 
-              "title": "Program Starts",
+          "explanation":
+          "JVM creates a new stack frame for main method execution.",
 
-              "code":
-              "public static void main(String[] args)",
+          "memoryAfter": {
 
-              "explanation":
-              "JVM creates a new stack frame for main method execution.",
-
-              "memoryAfter": {
-
-                "stack": [
-                  {
-                    "frame": "main()",
-                    "variables": []
-                  }
-                ],
-
-                "heap": []
+            "stack": [
+              {
+                "frame": "main()",
+                "variables": []
               }
-            },
+            ],
 
-            {
-              "id": 2,
+            "heap": []
+          }
+        },
 
-              "title": "Object Allocation",
+        {
+          "id": 2,
 
-              "code":
-              "User user = new User();",
+          "title": "Object Allocation",
 
-              "explanation":
-              "JVM allocates object inside heap and stores reference inside stack frame.",
+          "code":
+          "User user = new User();",
 
-              "memoryAfter": {
+          "explanation":
+          "JVM allocates object inside heap and stores reference inside stack frame.",
 
-                "stack": [
+          "memoryAfter": {
+
+            "stack": [
+              {
+                "frame": "main()",
+
+                "variables": [
                   {
-                    "frame": "main()",
-
-                    "variables": [
-                      {
-                        "name": "user",
-                        "value": "0x1A2B"
-                      }
-                    ]
-                  }
-                ],
-
-                "heap": [
-                  {
-                    "address": "0x1A2B",
-
-                    "type": "User",
-
-                    "fields": {
-                      "name": "Rahul",
-                      "age": 22
-                    }
+                    "name": "user",
+                    "value": "0x1A2B"
                   }
                 ]
               }
-            }
+            ],
 
-          ]
+            "heap": [
+              {
+                "address": "0x1A2B",
+
+                "type": "User",
+
+                "fields": {
+                  "name": "Rahul",
+                  "age": 22
+                }
+              }
+            ]
+          }
         }
-        """)
+
+      ]
+    }
+    """)
 
                         .build()
         );

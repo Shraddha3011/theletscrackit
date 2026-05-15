@@ -5,6 +5,8 @@ import com.letscrackitt.backend.security.JwtAuthFilter;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -46,6 +48,9 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
 
+    @Value("${FRONTEND_URL}")
+    private String frontendUrl;
+
     @Bean
     public SecurityFilterChain filterChain(
             HttpSecurity http
@@ -75,11 +80,15 @@ public class SecurityConfig {
                         ).permitAll()
 
                         .requestMatchers(
-                                "/api/auth/**"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                HttpMethod.GET,
+                                "/",
+                                "/home",
+                                "/auth/**",
+                                "/api/auth/**",
+                                "/topics/**",
+                                "/courses/**",
+                                "/lessons/**",
+                                "/projects/**",
+                                "/notes/**",
                                 "/api/home",
                                 "/api/courses/**",
                                 "/api/lessons/**",
@@ -132,7 +141,7 @@ public class SecurityConfig {
                         ).hasRole("ADMIN")
 
                         .anyRequest()
-                        .permitAll()
+                        .authenticated()
                 )
 
                 .authenticationProvider(
@@ -154,9 +163,7 @@ public class SecurityConfig {
                 new CorsConfiguration();
 
         config.setAllowedOrigins(
-                List.of(
-                        "http://localhost:5173"
-                )
+                List.of(frontendUrl)
         );
 
         config.setAllowedMethods(

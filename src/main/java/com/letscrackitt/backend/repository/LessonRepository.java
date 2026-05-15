@@ -9,4 +9,8 @@ public interface LessonRepository
         extends JpaRepository<Lesson, Long> {
 
     Optional<Lesson> findFirstBySlug(String slug);
+
+    Optional<Lesson> findBySlug(String slug);
+
+    boolean existsBySlug(String slug);
 }
