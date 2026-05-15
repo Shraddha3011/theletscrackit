@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: letscrackitt-backend
+    env: java
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -jar target/*.jar
+    envVars:
+      - key: DB_URL
+        value: "postgresql://neondb_owner:npg_iKbGOlF4p2tI@ep-lucky-forest-ap73v4qp-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+      - key: DB_USERNAME
+        value: "neondb_owner"
+      - key: DB_PASSWORD
+        value: "npg_iKbGOlF4p2tI"
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: JWT_SECRET
+        value: "letscrackitt_super_secret_key_make_it_long_256bits_minimum"
+      - key: PORT
+        value: "8080"

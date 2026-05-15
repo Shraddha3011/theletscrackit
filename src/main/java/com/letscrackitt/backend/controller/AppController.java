@@ -3,15 +3,21 @@ package com.letscrackitt.backend.controller;
 import com.letscrackitt.backend.entity.Comment;
 import com.letscrackitt.backend.entity.Note;
 import com.letscrackitt.backend.entity.User;
+import com.letscrackitt.backend.entity.Lesson;
 import com.letscrackitt.backend.repository.CommentRepository;
 import com.letscrackitt.backend.repository.NoteRepository;
 import com.letscrackitt.backend.repository.TopicRepository;
 import com.letscrackitt.backend.repository.UserRepository;
+import com.letscrackitt.backend.repository.LessonRepository;
+import com.letscrackitt.backend.repository.ProgressRepository;
+import com.letscrackitt.backend.entity.Progress;
+import com.letscrackitt.backend.service.XpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +31,9 @@ public class AppController {
     private final NoteRepository noteRepository;
     private final TopicRepository topicRepository;
     private final CommentRepository commentRepository;
+    private final LessonRepository lessonRepository;
+    private final ProgressRepository progressRepository;
+    private final XpService xpService;
 
     @GetMapping("/api/progress")
     public Map<String, Object> progress(Principal principal) {
@@ -33,13 +42,16 @@ public class AppController {
 
         int totalNotes = (int) noteRepository.count();
 
+        long completedNotes = progressRepository.countByUserAndCompletedTrue(user);
+
         return Map.of(
-                "completedNotes", 0,
+                "completedNotes", completedNotes,
                 "totalNotes", totalNotes,
+                "xp", xpService.profile(user),
                 "weeklyXp", List.of(
                         Map.of(
                                 "day", "Today",
-                                "xp", user.getXpPoints()
+                                "xp", xpService.todayXp(user)
                         )
                 ),
                 "topicProgress", topicRepository.findAll().stream()
@@ -47,7 +59,12 @@ public class AppController {
                                 "slug", topic.getSlug(),
                                 "title", topic.getTitle(),
                                 "icon", topic.getIcon(),
-                                "completed", 0,
+                                "completed", progressRepository.findCompletedByUser(user).stream()
+                                        .filter(progress ->
+                                                progress.getNote() != null &&
+                                                        progress.getNote().getTopic() != null &&
+                                                        progress.getNote().getTopic().getId().equals(topic.getId()))
+                                        .count(),
                                 "total", noteRepository.findAll().stream()
                                         .filter(note ->
                                                 note.getTopic() != null &&
@@ -56,6 +73,7 @@ public class AppController {
                         ))
                         .toList(),
                 "achievements", List.of(),
+                "xpTransactions", xpService.recentTransactions(user),
                 "bookmarks", List.of()
         );
     }
@@ -70,19 +88,31 @@ public class AppController {
 
         Note note = noteRepository.findById(noteId).orElseThrow();
 
-        int xp = note.getXpReward() == null
-                ? 10
-                : note.getXpReward();
+        Progress progress = progressRepository.findByUserAndNote(user, note)
+                .orElseGet(() -> Progress.builder()
+                        .user(user)
+                        .note(note)
+                        .completed(false)
+                        .build());
 
-        user.setXpPoints(user.getXpPoints() + xp);
+        boolean alreadyCompleted = Boolean.TRUE.equals(progress.getCompleted());
 
-        userRepository.save(user);
+        progress.setCompleted(true);
+        progress.setReadAt(LocalDateTime.now());
+        progressRepository.save(progress);
 
-        return Map.of(
-                "completed", true,
-                "xpEarned", xp,
-                "xpPoints", user.getXpPoints()
+        Map<String, Object> xp = xpService.awardOnce(
+                user,
+                XpService.SOURCE_NOTE,
+                note.getId(),
+                note.getXpReward() == null ? 10 : note.getXpReward()
         );
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("completed", true);
+        response.put("alreadyCompleted", alreadyCompleted);
+        response.putAll(xp);
+        return response;
     }
 
     @GetMapping("/api/bookmarks")
@@ -134,6 +164,11 @@ public class AppController {
                             comment.getCreatedAt()
                     );
 
+                    response.put(
+                            "likes",
+                            comment.getLikes() == null ? 0 : comment.getLikes()
+                    );
+
                     return response;
                 })
                 .toList();
@@ -162,7 +197,105 @@ public class AppController {
         return Map.of(
                 "id", saved.getId(),
                 "body", saved.getBody(),
-                "username", user.getFullName()
+                "username", user.getFullName(),
+                "likes", saved.getLikes() == null ? 0 : saved.getLikes()
+        );
+    }
+
+    // Lesson Comments
+    @GetMapping("/api/lessons/{lessonId}/comments")
+    public List<Map<String, Object>> lessonComments(
+            @PathVariable Long lessonId
+    ) {
+        return commentRepository.findAll().stream()
+                .filter(comment ->
+                        comment.getLesson() != null &&
+                                comment.getLesson().getId().equals(lessonId))
+                .map(comment -> {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("id", comment.getId());
+                    response.put("body", comment.getBody());
+                    response.put("username", comment.getUser() == null ? "Learner" : comment.getUser().getFullName());
+                    response.put("createdAt", comment.getCreatedAt());
+                    response.put("likes", comment.getLikes() == null ? 0 : comment.getLikes());
+                    return response;
+                })
+                .toList();
+    }
+
+    @PostMapping("/api/lessons/{lessonId}/comments")
+    public Map<String, Object> addLessonComment(
+            @PathVariable Long lessonId,
+            @RequestBody Map<String, String> request,
+            Principal principal
+    ) {
+        User user = currentUser(principal);
+        Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
+
+        Comment comment = Comment.builder()
+                .body(request.getOrDefault("body", ""))
+                .lesson(lesson)
+                .user(user)
+                .build();
+
+        Comment saved = commentRepository.save(comment);
+
+        return Map.of(
+                "id", saved.getId(),
+                "body", saved.getBody(),
+                "username", user.getFullName(),
+                "likes", saved.getLikes() == null ? 0 : saved.getLikes()
+        );
+    }
+
+    // Lesson Like/Unlike
+    @PostMapping("/api/lessons/{lessonId}/like")
+    public Map<String, Object> likeLesson(
+            @PathVariable Long lessonId,
+            @RequestParam(defaultValue = "false") boolean unlike
+    ) {
+        try {
+            Lesson lesson = lessonRepository.findById(lessonId).orElse(null);
+            if (lesson == null) {
+                return Map.of("error", "Lesson not found", "liked", false);
+            }
+
+            int currentLikes = lesson.getLikes() == null ? 0 : lesson.getLikes();
+
+            if (unlike) {
+                lesson.setLikes(Math.max(0, currentLikes - 1));
+            } else {
+                lesson.setLikes(currentLikes + 1);
+            }
+
+            Lesson saved = lessonRepository.save(lesson);
+
+            return Map.of("id", saved.getId(), "likes", saved.getLikes(), "liked", !unlike);
+        } catch (Exception e) {
+            return Map.of("error", e.getMessage(), "liked", false);
+        }
+    }
+
+    @PostMapping("/api/comments/{id}/like")
+    public Map<String, Object> likeComment(
+            @PathVariable Long id,
+            Principal principal
+    ) {
+
+        currentUser(principal);
+
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow();
+
+        comment.setLikes(
+                (comment.getLikes() == null ? 0 : comment.getLikes()) + 1
+        );
+
+        Comment saved = commentRepository.save(comment);
+
+        return Map.of(
+                "id", saved.getId(),
+                "likes", saved.getLikes()
         );
     }
 

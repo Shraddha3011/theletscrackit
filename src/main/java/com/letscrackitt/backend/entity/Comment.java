@@ -9,7 +9,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comments", indexes = {
-        @Index(name = "idx_comments_note", columnList = "note_id")
+        @Index(name = "idx_comments_note", columnList = "note_id"),
+        @Index(name = "idx_comments_lesson", columnList = "lesson_id")
 })
 @Data
 @Builder
@@ -24,8 +25,12 @@ public class Comment {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "note_id", nullable = false)
+    @JoinColumn(name = "note_id")
     private Note note;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lesson_id")
+    private Lesson lesson;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

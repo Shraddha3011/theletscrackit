@@ -4,6 +4,7 @@ import com.letscrackitt.backend.entity.Topic;
 import com.letscrackitt.backend.repository.TopicRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,7 +14,9 @@ public class TopicService {
     private TopicRepository topicRepository;
 
     public List<Topic> getAllTopics() {
-        return topicRepository.findAll();
+        return topicRepository.findAll().stream()
+                .sorted(Comparator.comparingInt(t -> t.getOrderIndex() == null ? 0 : t.getOrderIndex()))
+                .toList();
     }
 
     public Topic createTopic(Topic topic) {

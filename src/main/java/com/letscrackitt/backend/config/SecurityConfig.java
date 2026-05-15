@@ -69,23 +69,68 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // PREFLIGHT
                         .requestMatchers(
                                 HttpMethod.OPTIONS,
                                 "/**"
                         ).permitAll()
 
-                        // AUTH
                         .requestMatchers(
                                 "/api/auth/**"
                         ).permitAll()
 
-                        // PUBLIC
                         .requestMatchers(
-                                "/api/**"
+                                HttpMethod.GET,
+                                "/api/home",
+                                "/api/courses/**",
+                                "/api/lessons/**",
+                                "/api/projects/**",
+                                "/api/topics/**",
+                                "/api/notes/**",
+                                "/api/leaderboard",
+                                "/api/search"
                         ).permitAll()
 
-                        // EVERYTHING
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/notes/*/comments",
+                                "/api/comments/*/like"
+                        ).authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/comments/**"
+                        ).authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/quizzes/**",
+                                "/api/questions/**"
+                        ).authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/quizzes/**",
+                                "/api/questions/**",
+                                "/api/topics/**",
+                                "/api/notes/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/quizzes/**",
+                                "/api/questions/**",
+                                "/api/topics/**",
+                                "/api/notes/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/quizzes/**",
+                                "/api/questions/**",
+                                "/api/topics/**",
+                                "/api/notes/**"
+                        ).hasRole("ADMIN")
+
                         .anyRequest()
                         .permitAll()
                 )

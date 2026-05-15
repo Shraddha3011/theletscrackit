@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,6 +23,7 @@ public class HomeController {
     private final QuestionRepository questionRepository;
     private final HomeContentItemRepository homeContentItemRepository;
     private final QuizRepository quizRepository;
+    private final CourseRepository courseRepository;
 
     @GetMapping("/api/home")
     public Map<String, Object> home() {
@@ -41,7 +43,6 @@ public class HomeController {
     private List<Map<String, Object>> stats() {
         return List.of(
                 stat("Topics Covered", topicRepository.count()),
-                stat("Notes Published", noteRepository.count()),
                 stat("Active Learners", userRepository.count()),
                 stat("Quiz Questions", questionRepository.count())
         );
@@ -53,7 +54,6 @@ public class HomeController {
         stat.put("value", String.valueOf(value));
         stat.put("icon", switch (label) {
             case "Topics Covered" -> "Topics";
-            case "Notes Published" -> "Notes";
             case "Active Learners" -> "Users";
             default -> "Quiz";
         });
@@ -86,9 +86,13 @@ public class HomeController {
         response.put("description", topic.getDescription() == null ? "" : topic.getDescription());
         response.put("icon", topic.getIcon() == null ? "" : topic.getIcon());
         response.put("color", topic.getColor() == null ? "" : topic.getColor());
-        response.put("noteCount", noteRepository.findByTopicId(topic.getId()).size());
+
+        long lessonCount = courseRepository.countLessonsByTopicId(topic.getId());
+
+        response.put("moduleCount", courseRepository.countModulesByTopicId(topic.getId()));
+        response.put("subtopicCount", lessonCount);
         response.put("quizCount",
-                quizRepository.findByTopicId(topic.getId()).size()
+                quizRepository.countByTopicId(topic.getId())
         );
         return response;
     }

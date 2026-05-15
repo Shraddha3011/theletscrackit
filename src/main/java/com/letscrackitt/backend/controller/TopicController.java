@@ -1,7 +1,7 @@
 package com.letscrackitt.backend.controller;
 
 import com.letscrackitt.backend.entity.Topic;
-import com.letscrackitt.backend.repository.NoteRepository;
+import com.letscrackitt.backend.repository.CourseRepository;
 import com.letscrackitt.backend.repository.QuizRepository;
 import com.letscrackitt.backend.service.TopicService;
 
@@ -22,7 +22,7 @@ public class TopicController {
 
     private final TopicService topicService;
 
-    private final NoteRepository noteRepository;
+    private final CourseRepository courseRepository;
 
     private final QuizRepository quizRepository;
 
@@ -131,15 +131,14 @@ public class TopicController {
                         ? ""
                         : topic.getColor(),
 
-                "noteCount",
-                noteRepository.findByTopicId(
-                        topic.getId()
-                ).size(),
+                "moduleCount",
+                courseRepository.countModulesByTopicId(topic.getId()),
+
+                "subtopicCount",
+                courseRepository.countLessonsByTopicId(topic.getId()),
 
                 "quizCount",
-                quizRepository.findByTopicId(
-                        topic.getId()
-                ).size()
+                quizRepository.countByTopicId(topic.getId())
         );
     }
 

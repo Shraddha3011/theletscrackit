@@ -2,15 +2,20 @@ package com.letscrackitt.backend.controller;
 
 import com.letscrackitt.backend.entity.Quiz;
 import com.letscrackitt.backend.entity.Topic;
+import com.letscrackitt.backend.entity.User;
 import com.letscrackitt.backend.entity.enums.Difficulty;
 import com.letscrackitt.backend.repository.QuizRepository;
 import com.letscrackitt.backend.repository.TopicRepository;
+import com.letscrackitt.backend.repository.UserRepository;
+import com.letscrackitt.backend.service.XpService;
 
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +29,8 @@ public class QuizController {
     private final QuizRepository quizRepository;
 
     private final TopicRepository topicRepository;
+    private final UserRepository userRepository;
+    private final XpService xpService;
 
     // GET ALL QUIZZES
     @GetMapping
@@ -274,6 +281,63 @@ public class QuizController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PostMapping("/{id}/submit")
+    public ResponseEntity<?> submit(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> request,
+            Principal principal
+    ) {
+        User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow();
+
+        Long topicId = id;
+        List<Quiz> quizzes = quizRepository.findByTopicId(topicId);
+
+        if (quizzes.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Object rawAnswers = request.getOrDefault("answers", Map.of());
+        Map<?, ?> answers = rawAnswers instanceof Map<?, ?> map ? map : Map.of();
+        int score = 0;
+        int totalXp = 0;
+        List<Map<String, Object>> results = new ArrayList<>();
+
+        for (Quiz quiz : quizzes) {
+            Object answerValue = answers.get(String.valueOf(quiz.getId()));
+            String submittedAnswer = answerValue == null ? "" : String.valueOf(answerValue);
+            boolean correct = isCorrectAnswer(quiz, submittedAnswer);
+            int quizXp = quiz.getXpReward() == null ? 5 : quiz.getXpReward();
+
+            if (correct) {
+                score++;
+                totalXp += quizXp;
+            }
+
+            results.add(Map.of(
+                    "quizId", quiz.getId(),
+                    "correct", correct,
+                    "correctAnswer", quiz.getCorrectAnswer(),
+                    "xpReward", quizXp
+            ));
+        }
+
+        Map<String, Object> xp = xpService.awardOnce(
+                user,
+                XpService.SOURCE_QUIZ,
+                topicId,
+                totalXp
+        );
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("score", score);
+        response.put("total", quizzes.size());
+        response.put("results", results);
+        response.putAll(xp);
+
+        return ResponseEntity.ok(response);
+    }
+
     // RESPONSE FORMAT
     private Map<String, Object> toResponse(
             Quiz quiz
@@ -324,5 +388,22 @@ public class QuizController {
         );
 
         return response;
+    }
+
+    private boolean isCorrectAnswer(Quiz quiz, String submittedAnswer) {
+        String answer = submittedAnswer == null ? "" : submittedAnswer.trim();
+        String correct = quiz.getCorrectAnswer() == null ? "" : quiz.getCorrectAnswer().trim();
+
+        if (answer.equalsIgnoreCase(correct)) {
+            return true;
+        }
+
+        return switch (correct.toUpperCase()) {
+            case "A" -> answer.equalsIgnoreCase(quiz.getOptionA());
+            case "B" -> answer.equalsIgnoreCase(quiz.getOptionB());
+            case "C" -> answer.equalsIgnoreCase(quiz.getOptionC());
+            case "D" -> answer.equalsIgnoreCase(quiz.getOptionD());
+            default -> false;
+        };
     }
 }
