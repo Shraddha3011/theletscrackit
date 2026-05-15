@@ -141,7 +141,7 @@ public class SecurityConfig {
                         ).hasRole("ADMIN")
 
                         .anyRequest()
-                        .authenticated()
+                        .permitAll()
                 )
 
                 .authenticationProvider(
