@@ -14,7 +14,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/courses")
 @RequiredArgsConstructor
-@CrossOrigin
 public class CourseController {
 
     private final CourseRepository courseRepository;

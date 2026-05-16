@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/lessons")
 @RequiredArgsConstructor
-@CrossOrigin
 public class LessonController {
 
     private final LessonService lessonService;

@@ -17,7 +17,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/topics")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class TopicController {
 
     private final TopicService topicService;
