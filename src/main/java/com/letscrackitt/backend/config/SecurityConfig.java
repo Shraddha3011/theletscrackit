@@ -1,33 +1,19 @@
 package com.letscrackitt.backend.config;
 
-import com.letscrackitt.backend.security.CustomUserDetailsService;
 import com.letscrackitt.backend.security.JwtAuthFilter;
-
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import org.springframework.http.HttpMethod;
-
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
 import org.springframework.security.config.http.SessionCreationPolicy;
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -46,8 +32,6 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    private final CustomUserDetailsService userDetailsService;
-
     @Value("${FRONTEND_URL}")
     private String frontendUrl;
 
@@ -57,7 +41,6 @@ public class SecurityConfig {
     ) throws Exception {
 
         http
-
                 .csrf(AbstractHttpConfigurer::disable)
 
                 .cors(cors ->
@@ -72,80 +55,8 @@ public class SecurityConfig {
                         )
                 )
 
-                .authorizeHttpRequests(auth -> auth
-
-                        .requestMatchers(
-                                HttpMethod.OPTIONS,
-                                "/**"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                "/",
-                                "/home",
-                                "/auth/**",
-                                "/api/auth/**",
-                                "/topics/**",
-                                "/courses/**",
-                                "/lessons/**",
-                                "/projects/**",
-                                "/notes/**",
-                                "/api/home",
-                                "/api/courses/**",
-                                "/api/lessons/**",
-                                "/api/projects/**",
-                                "/api/topics/**",
-                                "/api/notes/**",
-                                "/api/leaderboard",
-                                "/api/search"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/notes/*/comments",
-                                "/api/comments/*/like"
-                        ).authenticated()
-
-                        .requestMatchers(
-                                HttpMethod.DELETE,
-                                "/api/comments/**"
-                        ).authenticated()
-
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/api/quizzes/**",
-                                "/api/questions/**"
-                        ).authenticated()
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/quizzes/**",
-                                "/api/questions/**",
-                                "/api/topics/**",
-                                "/api/notes/**"
-                        ).hasRole("ADMIN")
-
-                        .requestMatchers(
-                                HttpMethod.PUT,
-                                "/api/quizzes/**",
-                                "/api/questions/**",
-                                "/api/topics/**",
-                                "/api/notes/**"
-                        ).hasRole("ADMIN")
-
-                        .requestMatchers(
-                                HttpMethod.DELETE,
-                                "/api/quizzes/**",
-                                "/api/questions/**",
-                                "/api/topics/**",
-                                "/api/notes/**"
-                        ).hasRole("ADMIN")
-
-                        .anyRequest()
-                        .permitAll()
-                )
-
-                .authenticationProvider(
-                        authenticationProvider()
+                .authorizeHttpRequests(auth ->
+                        auth.anyRequest().permitAll()
                 )
 
                 .addFilterBefore(
@@ -162,12 +73,17 @@ public class SecurityConfig {
         CorsConfiguration config =
                 new CorsConfiguration();
 
-        config.setAllowedOrigins(
-                List.of(frontendUrl)
-        );
+        // Allow multiple origins for development and production
+        List<String> allowedOrigins = new java.util.ArrayList<>();
+        allowedOrigins.add(frontendUrl);
+        // Add localhost for development
+        allowedOrigins.add("http://localhost:5173");
+        allowedOrigins.add("http://localhost:3000");
+
+        config.setAllowedOrigins(allowedOrigins);
 
         config.setAllowedMethods(
-                List.of("*")
+                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
         );
 
         config.setAllowedHeaders(
@@ -175,6 +91,8 @@ public class SecurityConfig {
         );
 
         config.setAllowCredentials(true);
+
+        config.setExposedHeaders(List.of("Authorization"));
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
@@ -185,36 +103,5 @@ public class SecurityConfig {
         );
 
         return source;
-    }
-
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-
-        DaoAuthenticationProvider provider =
-                new DaoAuthenticationProvider();
-
-        provider.setUserDetailsService(
-                userDetailsService
-        );
-
-        provider.setPasswordEncoder(
-                passwordEncoder()
-        );
-
-        return provider;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config
-    ) throws Exception {
-
-        return config.getAuthenticationManager();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-
-        return new BCryptPasswordEncoder();
     }
 }

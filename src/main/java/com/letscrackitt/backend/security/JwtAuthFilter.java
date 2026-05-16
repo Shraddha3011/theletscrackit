@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
@@ -24,7 +23,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -40,12 +38,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String path = request.getServletPath();
+        String token =
+                extractToken(request);
 
-        if (
-                path.equals("/api/auth/login")
-                        || path.equals("/api/auth/signup")
-        ) {
+        // NO TOKEN → ALLOW REQUEST
+        if (!StringUtils.hasText(token)) {
 
             filterChain.doFilter(
                     request,
@@ -55,15 +52,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token =
-                extractToken(request);
+        try {
 
-        if (
-                StringUtils.hasText(token)
-                        && jwtUtil.validateToken(token)
-        ) {
-
-            try {
+            if (jwtUtil.validateToken(token)) {
 
                 String email =
                         jwtUtil.getEmailFromToken(token);
@@ -86,14 +77,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder
                         .getContext()
                         .setAuthentication(auth);
-
-            } catch (Exception e) {
-
-                log.error(
-                        "Could not set user authentication: {}",
-                        e.getMessage()
-                );
             }
+
+        } catch (Exception ignored) {
         }
 
         filterChain.doFilter(
