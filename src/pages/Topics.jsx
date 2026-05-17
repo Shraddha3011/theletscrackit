@@ -15,9 +15,11 @@ import {
 import {
   Search,
   ArrowUpRight,
-  Brain,
   BookOpen,
   Trophy,
+  Zap,
+  Target,
+  Play,
 } from 'lucide-react'
 
 import {
@@ -250,9 +252,9 @@ function TopicCard({
 
   return (
 
-    <Link
-      ref={ref}
-      to={`/topics/${topic.slug}`}
+<Link
+  ref={ref}
+  to={`/lessons/${topic.slug}`}
       className="
         group
         relative
@@ -471,12 +473,12 @@ function TopicCard({
             gap-2
             rounded-full
             border
-            border-white/10
-            bg-white/[0.05]
+            border-violet-500/20
+            bg-violet-500/10
             px-4
             py-2.5
             text-[0.82rem]
-            text-[#d8deff]
+            text-violet-300
             backdrop-blur-md
           "
         >
@@ -484,7 +486,7 @@ function TopicCard({
           <BookOpen size={13} />
 
           <span>
-            {topic.noteCount || 0}
+            {topic.moduleCount || 0} Modules
           </span>
 
         </div>
@@ -496,45 +498,20 @@ function TopicCard({
             gap-2
             rounded-full
             border
-            border-white/10
-            bg-white/[0.05]
+            border-cyan-500/20
+            bg-cyan-500/10
             px-4
             py-2.5
             text-[0.82rem]
-            text-[#d8deff]
+            text-cyan-300
             backdrop-blur-md
           "
         >
 
-          <Brain size={13} />
+          <Target size={13} />
 
           <span>
-            {topic.quizCount || 0}
-          </span>
-
-        </div>
-
-        <div
-          className="
-            flex
-            items-center
-            gap-2
-            rounded-full
-            border
-            border-white/10
-            bg-white/[0.05]
-            px-4
-            py-2.5
-            text-[0.82rem]
-            text-[#d8deff]
-            backdrop-blur-md
-          "
-        >
-
-          <Trophy size={13} />
-
-          <span>
-            {topic.questionCount || 0}
+            {topic.subtopicCount || 0} Subtopics
           </span>
 
         </div>
@@ -649,39 +626,12 @@ export default function Topics() {
 
   }, [dispatch])
 
-  const totalNotes =
-    useMemo(() => {
-
-      return topics.reduce(
-
-        (acc, topic) =>
-
-          acc + (topic.noteCount || 0),
-
-        0
-      )
-
-    }, [topics])
-
-  const totalQuizzes =
-    useMemo(() => {
-
-      return topics.reduce(
-
-        (acc, topic) =>
-
-          acc + (topic.quizCount || 0),
-
-        0
-      )
-
-    }, [topics])
-
   const filteredTopics =
     useMemo(() => {
 
       return topics.filter((topic) =>
 
+        topic.slug !== 'dsa' &&
         topic.title
           ?.toLowerCase()
           .includes(
@@ -756,9 +706,8 @@ export default function Topics() {
               className="
                 font-display
                 font-bold
-                leading-[1.06]
-                tracking-[-0.07em]
-                text-[clamp(2.6rem,5.5vw,4.2rem)]
+                leading-[1.08]
+                text-[clamp(2.4rem,4vw,4rem)]
                 text-white
               "
             >
@@ -854,7 +803,7 @@ export default function Topics() {
 
           {/* stats */}
 
-          <div
+          {/* <div
             className="
               mb-20
               grid
@@ -865,7 +814,7 @@ export default function Topics() {
 
             <StatCard
               icon={
-                <BookOpen size={18} />
+                <Target size={18} />
               }
               value={topics.length}
               label="Topics"
@@ -875,19 +824,19 @@ export default function Topics() {
               icon={
                 <BookOpen size={18} />
               }
-              value={totalNotes}
-              label="Notes"
+              value={topics.reduce((acc, t) => acc + (t.moduleCount || 0), 0)}
+              label="Modules"
             />
 
             <StatCard
               icon={
-                <Brain size={18} />
+                <Zap size={18} />
               }
-              value={totalQuizzes}
+              value={topics.reduce((acc, t) => acc + (t.quizCount || 0), 0)}
               label="Quizzes"
             />
 
-          </div>
+          </div> */}
 
         </section>
 

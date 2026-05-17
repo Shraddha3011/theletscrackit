@@ -1,4 +1,5 @@
 import Navbar from './Navbar'
+import Footer from './Footer'
 import Toast from '../common/Toast'
 
 export default function PageWrapper({ children, className = '' }) {
@@ -8,6 +9,7 @@ export default function PageWrapper({ children, className = '' }) {
       <main className={`flex-1 ${className}`}>
         {children}
       </main>
+      <Footer />
       <Toast />
     </div>
   )

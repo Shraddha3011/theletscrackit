@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/SHRADDHA  JADHAV/IdeaProjects/backend/src/main/java/com/letscrackitt/backend/controller/**)",
+      "Read(//c/Users/SHRADDHA  JADHAV/IdeaProjects/backend/src/main/java/com/letscrackitt/backend/repository/**)",
+      "Read(//c/Users/SHRADDHA  JADHAV/IdeaProjects/backend/**)",
+      "Bash(Get-Content \"C:\\\\Users\\\\SHRADDHA  JADHAV\\\\IdeaProjects\\\\backend\\\\src\\\\main\\\\java\\\\com\\\\letscrackitt\\\\backend\\\\repository\\\\ModuleRepository.java\")"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\SHRADDHA  JADHAV\\IdeaProjects\\backend\\src\\main\\java\\com\\letscrackitt\\backend\\dto\\response",
+      "C:\\Users\\SHRADDHA  JADHAV\\IdeaProjects\\backend\\src\\main\\java\\com\\letscrackitt\\backend\\service",
+      "C:\\Users\\SHRADDHA  JADHAV\\IdeaProjects\\backend\\src\\main\\java\\com\\letscrackitt\\backend\\controller",
+      "C:\\Users\\SHRADDHA  JADHAV\\IdeaProjects\\backend\\src\\main\\java\\com\\letscrackitt\\backend\\entity",
+      "C:\\Users\\SHRADDHA  JADHAV\\IdeaProjects\\backend\\src\\main\\java\\com\\letscrackitt\\backend\\repository",
+      "C:\\Users\\SHRADDHA  JADHAV\\IdeaProjects\\backend\\src\\main\\java\\com\\letscrackitt\\backend\\config",
+      "C:\\Users\\SHRADDHA  JADHAV\\IdeaProjects\\backend\\src\\main\\resources",
+      "C:\\Users\\SHRADDHA  JADHAV\\IdeaProjects\\backend"
+    ]
+  }
+}

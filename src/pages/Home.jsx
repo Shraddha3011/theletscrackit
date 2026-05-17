@@ -81,24 +81,7 @@ function Stat({ icon, value, label, delay, started }) {
   )
 }
 
-/* ─── Bento size logic ─── */
-const getBentoSize = (index, total) => {
-  if (index === 0) return 'large'
-  if (index === 3 && total > 5) return 'tall'
-  return 'normal'
-}
-
 /* ─── Topic Bento Card ─── */
-const TOPIC_LAYOUTS = [
-  'xl',
-  'wide',
-  'normal',
-  'tall',
-  'normal',
-  'wide',
-  'normal',
-  'tall',
-]
 
 const FEATURED_INDEXES = [0, 4]
 
@@ -113,7 +96,7 @@ function TopicCard({ topic, index }) {
 
   return (
     <Link
-      to={`/topics/${topic.slug}`}
+      to={`/lessons/${topic.slug}`}
       className={`
         group
         relative
@@ -319,7 +302,7 @@ function TopicCard({ topic, index }) {
             borderColor: 'rgba(255,255,255,0.06)',
           }}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <div
               className="
                 px-3
@@ -327,30 +310,16 @@ function TopicCard({ topic, index }) {
                 rounded-xl
                 text-xs
                 font-semibold
+                whitespace-nowrap
               "
               style={{
                 background: 'rgba(255,255,255,0.05)',
                 color: 'rgba(255,255,255,0.75)',
               }}
             >
-              {topic.noteCount || 0} Notes
+              {topic.moduleCount || 0} Modules
             </div>
 
-            <div
-              className="
-                px-3
-                py-1.5
-                rounded-xl
-                text-xs
-                font-semibold
-              "
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                color: 'rgba(255,255,255,0.75)',
-              }}
-            >
-              {topic.quizCount || 0} Quizzes
-            </div>
           </div>
 
           <div
@@ -474,7 +443,7 @@ export default function Home() {
       .finally(() => setLoading(false))
   }, [])
 
-  const displayTopics = topics.slice(0, 9)
+  const displayTopics = topics.filter(t => t.slug !== 'dsa').slice(0, 9)
 
   return (
     <PageWrapper>
@@ -535,57 +504,55 @@ export default function Home() {
               </div>
 
               {/* Headline */}
-              <div className="animate-slide-up">
-                <h1 className="font-display font-bold leading-[1.06]" style={{ fontSize: 'clamp(2.6rem, 5.5vw, 4.2rem)', color: 'var(--text-primary)' }}>
-                  Your Place to Learn<br />and Master{' '}
-                  <span className="relative inline-block">
-                    <span style={{
-                      background: 'linear-gradient(135deg, #06d96e 0%, #2df28a 45%, #06b6d4 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}>
-                      {typed || '\u00A0'}
-                    </span>
-                    {/* Blinking cursor */}
-                    <span className="absolute -right-1 top-1 bottom-1 w-[3px] rounded-full animate-pulse"
-                      style={{ background: '#06d96e' }} />
-                  </span>
-                </h1>
-              </div>
-
-<p
-  className="
-    text-[1.02rem]
-    lg:text-[1.1rem]
-    leading-[1.9]
-    animate-slide-up
-    animate-delay-100
-    text-[#97a0cb]
-    max-w-[620px]
-  "
->
-
-  A place where learning tech actually feels organized.
-
-  <span
-    className="
-      block
-      mt-3
-      font-medium
-      text-white/90
-    "
+{/* Headline */}
+<div className="animate-slide-up">
+  <h1
+    className="font-display font-bold leading-[1.06] tracking-[-0.04em]"
+    style={{
+      fontSize: 'clamp(2.6rem, 5.5vw, 4.2rem)',
+      color: 'var(--text-primary)',
+    }}
   >
+    Your Place to Learn
+    <br />
+    and Master{' '}
 
-    Learn deeply. Build confidently. Practice endlessly.
+    <span className="relative inline-block">
+      <span
+        style={{
+          background:
+            'linear-gradient(135deg, #06d96e 0%, #2df28a 45%, #06b6d4 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+        }}
+      >
+        {typed || '\u00A0'}
+      </span>
 
-  </span>
+      {/* Blinking cursor */}
+      <span
+        className="absolute -right-1 top-1 bottom-1 w-[3px] rounded-full animate-pulse"
+        style={{ background: '#06d96e' }}
+      />
+    </span>
+  </h1>
+</div>
 
-</p>
+             {/* Sub */}
+              <p
+                className="fade-up-2 text-lg leading-relaxed max-w-xl"
+                style={{ color: 'rgba(255,255,255,0.45)', fontWeight: 400 }}
+              >
+                A place where learning tech actually feels interesting.
+                <span className="block mt-1" style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
+                  Learn deeply. Build confidently. Practice endlessly.
+                </span>
+              </p>
 
               {/* Pills */}
               <div className="flex flex-wrap gap-2 animate-slide-up animate-delay-200">
-                {['📝 Rich Notes', '⚡ XP System', '🔥 Streaks', '💬 Community', '🧪 Quizzes'].map(f => (
+                {['📝 Rich Notes','⚡ Code Challenges', '💬 Projects', '🧪 Quizzes'].map(f => (
                   <span key={f} className="px-3 py-1.5 rounded-lg text-xs font-medium"
                     style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: 'var(--text-muted)' }}>
                     {f}
@@ -596,20 +563,13 @@ export default function Home() {
               {/* CTAs */}
               <div className="flex flex-wrap gap-3 animate-slide-up animate-delay-300">
                 <Link
-                  to={isAuthenticated ? '/dashboard' : '/signup'}
-                  className="relative overflow-hidden inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm"
-                  style={{ background: '#06d96e', color: '#080809', boxShadow: '0 0 40px rgba(6,217,110,0.28)', transition: 'all .2s ease' }}
+                  to="/topics"
+                 className="relative overflow-hidden inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #06d96e, #06b6d4)',color: '#05050a',
+                    boxShadow: '0 0 40px rgba(6,217,110,0.3), 0 0 80px rgba(6,217,110,0.1)', transition: 'all .2s ease' }}
                   onMouseEnter={e => { e.currentTarget.style.background = '#2df28a'; e.currentTarget.style.boxShadow = '0 0 55px rgba(6,217,110,0.45)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
                   onMouseLeave={e => { e.currentTarget.style.background = '#06d96e'; e.currentTarget.style.boxShadow = '0 0 40px rgba(6,217,110,0.28)'; e.currentTarget.style.transform = 'translateY(0)' }}
-                >
-                  {isAuthenticated ? '→ Go to Dashboard' : '🚀 Start Learning Free'}
-                </Link>
-                <Link
-                  to="/topics"
-                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-primary)', transition: 'all .2s ease' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.09)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.transform = 'translateY(0)' }}
                 >
                   Browse Topics
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -649,7 +609,7 @@ export default function Home() {
                     {[
                       { lbl: '✓ Topics indexed', val: `${topics.length || '...'} ready`, c: '#4ade80' },
                       { lbl: '✓ XP engine', val: 'active', c: '#4ade80' },
-                      { lbl: '✓ Streak tracker', val: 'running', c: '#4ade80' },
+                      { lbl: '✓ Project paths', val: 'active', c: '#4ade80' },
                       { lbl: '⟳ Community sync', val: 'live', c: '#facc15' },
                       { lbl: '⟳ Quiz engine', val: 'loaded', c: '#facc15' },
                     ].map(r => (
@@ -662,7 +622,7 @@ export default function Home() {
                   </div>
 
                   <div className="rounded-xl p-3 mt-3" style={{ background: 'rgba(6,217,110,0.06)', border: '1px solid rgba(6,217,110,0.14)' }}>
-                    <div className="text-[10px] mb-2" style={{ color: 'var(--brand)' }}>// your session</div>
+                    <div className="text-[10px] mb-2" style={{ color: 'var(--brand)' }}>{'// your session'}</div>
                     {[
                       { k: 'notes_read', v: '—', vc: '#94a3b8' },
                       { k: 'xp_earned', v: '0', vc: '#4ade80' },
@@ -694,7 +654,7 @@ export default function Home() {
               </div>
               <div className="absolute -left-8 bottom-1/3 px-3.5 py-2.5 rounded-xl text-xs font-bold animate-float"
                 style={{ background: 'rgba(249,115,22,0.18)', border: '1px solid rgba(249,115,22,0.35)', color: '#fb923c', backdropFilter: 'blur(12px)', animationDelay: '2.8s' }}>
-                🔥 5-day streak!
+                🚀 Build mode activated!
               </div>
               <div className="absolute -left-6 top-10 px-3.5 py-2.5 rounded-xl text-xs font-bold animate-float"
                 style={{ background: 'rgba(6,217,110,0.12)', border: '1px solid rgba(6,217,110,0.3)', color: '#06d96e', backdropFilter: 'blur(12px)', animationDelay: '0.5s' }}>
@@ -714,7 +674,7 @@ export default function Home() {
       {/* ══════ STATS ══════ */}
       <section ref={statsRef} className="py-16">
         <div className="page-container">
-          <div className="relative overflow-hidden rounded-3xl px-8 py-12 grid grid-cols-2 lg:grid-cols-4 gap-10"
+          <div className="relative overflow-hidden rounded-3xl px-8 py-12"
             style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
             <div className="absolute inset-0 pointer-events-none"
               style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(6,217,110,0.04) 0%, transparent 70%)' }} />
@@ -723,14 +683,16 @@ export default function Home() {
             <div className="absolute top-4 left-4 w-8 h-8 border-t border-l rounded-tl-lg" style={{ borderColor: 'rgba(6,217,110,0.25)' }} />
             <div className="absolute bottom-4 right-4 w-8 h-8 border-b border-r rounded-br-lg" style={{ borderColor: 'rgba(6,217,110,0.25)' }} />
 
-            {stats.map((s, i) => (
-              <Stat
-                key={s.label || i}
-                {...s}
-                delay={i * 100}
-                started={statsInView}
-              />
-            ))}
+            <div className="grid grid-cols-3 gap-10 max-w-3xl mx-auto">
+              {stats.map((s, i) => (
+                <Stat
+                  key={s.label || i}
+                  {...s}
+                  delay={i * 100}
+                  started={statsInView}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -872,10 +834,16 @@ export default function Home() {
 
             {/* Steps */}
             <div>
-              <p className="section-label mb-3">The method</p>
-              <h2 className="font-display font-bold text-3xl text-primary mb-10">
-A better way to<br />
-<span style={{ color: 'var(--brand)' }}>explore tech</span>
+                           <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-3" style={{ color: '#06d96e' }}>
+                The Journey
+              </p>
+              <h2
+                className="font-black leading-tight mb-12"
+                style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', color: 'white' }}
+              >
+                Not just learning.
+                <br />
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}>An actual journey.</span>
               </h2>
               <div>
                 {steps.map((s, i) => (
@@ -941,12 +909,12 @@ A better way to<br />
               {/* CTA inside the features column */}
               <div className="p-5 rounded-2xl mt-2"
                 style={{ background: 'linear-gradient(135deg, rgba(6,217,110,0.08) 0%, rgba(6,182,212,0.05) 100%)', border: '1px solid rgba(6,217,110,0.18)' }}>
-                <p className="font-semibold text-sm text-primary mb-1">Ready to start?</p>
+                <p className="font-semibold text-sm text-primary mb-1">Ready to actually understand CS?</p>
                 <p className="text-xs text-muted mb-3">No credit card. No BS. Just learning.</p>
                 <Link to={isAuthenticated ? '/dashboard' : '/signup'}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold"
                   style={{ background: 'var(--brand)', color: '#080809' }}>
-                  {isAuthenticated ? '→ Dashboard' : '→ Create account'}
+                  {isAuthenticated ? '→ Dashboard' : '→ Begin Journey Free'}
                 </Link>
               </div>
             </div>
@@ -1035,7 +1003,7 @@ A better way to<br />
 
 
       {/* ══════ FOOTER ══════ */}
-      <footer className="border-t py-10" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+      <footer className="hidden border-t py-10" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
         <div className="page-container flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs"

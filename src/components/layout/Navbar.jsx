@@ -5,15 +5,11 @@ import { useAuth } from '../../hooks/useAuth'
 import { logout } from '../../app/slices/authSlice'
 import Avatar from '../common/Avatar'
 
+const brandLogo = '/logo.png'
+
 const SearchIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-  </svg>
-)
-
-const BellIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
   </svg>
 )
 
@@ -61,8 +57,9 @@ export default function Navbar() {
 
   const navLinks = [
     { to: '/topics', label: 'Topics' },
-    { to: '/interview-questions', label: 'Interview' },
+    { to: '/projects', label: 'Projects' },
     { to: '/quiz', label: 'Quiz' },
+        { to: '/cs-path', label: 'Explore' },
     // { to: '/search', label: 'Search' },
   ]
 
@@ -80,14 +77,13 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
-              style={{ background: 'linear-gradient(135deg, #06d96e, #2df28a)', color: '#0c0c12' }}
-            >
-              LC
-            </div>
+            <img
+              src={brandLogo}
+              alt="The LetsCrackIT"
+              className="h-10 w-10 rounded-xl object-cover shadow-[0_0_24px_rgba(166,210,92,0.28)]"
+            />
             <span className="font-display font-bold text-lg hidden sm:block" style={{ color: 'var(--text-primary)' }}>
-              TheLetsCrack<span style={{ color: 'var(--brand)' }}>IT</span>
+              The Lets Crack<span style={{ color: 'var(--brand)' }}>IT</span>
             </span>
           </Link>
 
@@ -106,30 +102,6 @@ export default function Navbar() {
                 {l.label}
               </Link>
             ))}
-            {isAuthenticated && (
-              <>
-                <Link
-                  to="/dashboard"
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    location.pathname === '/dashboard'
-                      ? 'text-brand-400'
-                      : 'text-secondary hover:text-primary hover:bg-white/5'
-                  }`}
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  to="/revision"
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    location.pathname === '/revision'
-                      ? 'text-brand-400'
-                      : 'text-secondary hover:text-primary hover:bg-white/5'
-                  }`}
-                >
-                  Revision
-                </Link>
-              </>
-            )}
           </nav>
 
           {/* Search bar */}
@@ -151,22 +123,6 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             {isAuthenticated ? (
               <>
-                {/* XP Badge */}
-                <div
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
-                  style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}
-                >
-                  ⚡ {user?.xpPoints || 0} XP
-                </div>
-
-                {/* Streak */}
-                <div
-                  className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold"
-                  style={{ background: 'rgba(249,115,22,0.1)', color: '#f97316', border: '1px solid rgba(249,115,22,0.25)' }}
-                >
-                  🔥 {user?.streak || 0}
-                </div>
-
                 {/* User menu */}
                 <div ref={userMenuRef} className="relative">
                   <button
@@ -189,10 +145,6 @@ export default function Navbar() {
                         <Link to="/profile" onClick={() => setUserMenuOpen(false)}
                           className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-secondary hover:text-primary hover:bg-white/5 transition-all">
                           👤 Profile
-                        </Link>
-                        <Link to="/revision" onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-secondary hover:text-primary hover:bg-white/5 transition-all">
-                          📚 Revision Hub
                         </Link>
                         {user?.role === 'ADMIN' && (
                           <Link to="/admin" onClick={() => setUserMenuOpen(false)}
@@ -243,14 +195,6 @@ export default function Navbar() {
             ))}
             {isAuthenticated && (
               <>
-                <Link to="/dashboard" onClick={() => setMenuOpen(false)}
-                  className="block px-4 py-3 rounded-xl text-sm font-medium text-secondary hover:text-primary hover:bg-white/5 transition-all">
-                  Dashboard
-                </Link>
-                <Link to="/revision" onClick={() => setMenuOpen(false)}
-                  className="block px-4 py-3 rounded-xl text-sm font-medium text-secondary hover:text-primary hover:bg-white/5 transition-all">
-                  Revision
-                </Link>
                 <Link to="/profile" onClick={() => setMenuOpen(false)}
                   className="block px-4 py-3 rounded-xl text-sm font-medium text-secondary hover:text-primary hover:bg-white/5 transition-all">
                   Profile

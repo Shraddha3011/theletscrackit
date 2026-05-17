@@ -5,6 +5,8 @@ import { useAuth } from '../hooks/useAuth'
 import { signup, clearError } from '../app/slices/authSlice'
 import Input from '../components/common/Input'
 import Button from '../components/common/Button'
+import PageWrapper from '../components/layout/PageWrapper'
+import { Eye, EyeOff } from 'lucide-react'
 
 export default function Signup() {
   const dispatch = useDispatch()
@@ -14,6 +16,7 @@ export default function Signup() {
   const [form, setForm] = useState({ fullName: '', username: '', email: '', password: '' })
   const [success, setSuccess] = useState(false)
   const [validationError, setValidationError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => () => dispatch(clearError()), [dispatch])
 
@@ -152,6 +155,7 @@ const handleSubmit = async (e) => {
 
   if (success) {
     return (
+      <PageWrapper>
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}>
         <div className="text-center space-y-4 animate-slide-up">
           <div className="text-5xl">🎉</div>
@@ -159,11 +163,13 @@ const handleSubmit = async (e) => {
           <p className="text-secondary">Redirecting you to sign in…</p>
         </div>
       </div>
+      </PageWrapper>
     )
   }
 
   return (
-    <div className="min-h-screen flex">
+    <PageWrapper>
+    <div className="min-h-[calc(100vh-4rem)] flex">
       {/* Left panel */}
       <div className="hidden lg:flex flex-col justify-between w-1/2 p-12 relative overflow-hidden"
         style={{ background: 'var(--bg-surface)' }}>
@@ -171,9 +177,8 @@ const handleSubmit = async (e) => {
         <div className="glow-orb w-96 h-96 bg-brand-500/10 top-20 right-10" />
 
         <Link to="/" className="relative flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm"
-            style={{ background: 'var(--brand)', color: '#0c0c12' }}>LC</div>
-          <span className="font-display font-bold text-lg text-primary">LetsCrackIT</span>
+          <img src="/logo.png" alt="The LetsCrackIT" className="h-10 w-10 rounded-xl object-cover" />
+          <span className="font-display font-bold text-lg text-primary">The Lets CrackIT</span>
         </Link>
 
         <div className="relative space-y-8">
@@ -210,9 +215,8 @@ const handleSubmit = async (e) => {
       <div className="flex-1 flex items-center justify-center p-6" style={{ background: 'var(--bg-primary)' }}>
         <div className="w-full max-w-md">
           <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs"
-              style={{ background: 'var(--brand)', color: '#0c0c12' }}>LC</div>
-            <span className="font-display font-bold text-base text-primary">LetsCrackIT</span>
+            <img src="/logo.png" alt="The LetsCrackIT" className="h-9 w-9 rounded-xl object-cover" />
+            <span className="font-display font-bold text-base text-primary">The Lets CrackIT</span>
           </div>
 
           <h1 className="font-display font-bold text-2xl text-primary mb-1">Create your account</h1>
@@ -229,7 +233,24 @@ const handleSubmit = async (e) => {
             <Input label="Full name" name="fullName" value={form.fullName} onChange={handleChange} placeholder="Rahul Sharma" required />
             <Input label="Username" name="username" value={form.username} onChange={handleChange} placeholder="rahul_dev" required />
             <Input label="Email address" name="email" type="email" value={form.email} onChange={handleChange} placeholder="you@example.com" required />
-            <Input label="Password" name="password" type="password" value={form.password} onChange={handleChange} placeholder="Min. 6 characters" required />
+            <Input
+              label="Password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              value={form.password}
+              onChange={handleChange}
+              placeholder="Min. 6 characters"
+              required
+              suffix={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-slate-400 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              }
+            />
 
             <Button type="submit" loading={loading} className="w-full mt-2" size="lg">
               Create Account
@@ -243,5 +264,6 @@ const handleSubmit = async (e) => {
         </div>
       </div>
     </div>
+    </PageWrapper>
   )
 }

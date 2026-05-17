@@ -12,6 +12,7 @@ import {
 
 import Input from '../components/common/Input'
 import Button from '../components/common/Button'
+import PageWrapper from '../components/layout/PageWrapper'
 
 export default function Login() {
 
@@ -85,7 +86,8 @@ export default function Login() {
 
   return (
 
-    <div className="min-h-screen flex">
+    <PageWrapper>
+    <div className="min-h-[calc(100vh-4rem)] flex">
 
       {/* LEFT PANEL */}
 
@@ -108,20 +110,10 @@ export default function Login() {
           className="relative flex items-center gap-2"
         >
 
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm"
-            style={{
-              background:
-                'var(--brand)',
-              color:
-                '#0c0c12'
-            }}
-          >
-            LC
-          </div>
+          <img src="/logo.png" alt="The LetsCrackIT" className="h-10 w-10 rounded-xl object-cover" />
 
           <span className="font-display font-bold text-lg text-primary">
-            LetsCrackIT
+            The Lets CrackIT
           </span>
 
         </Link>
@@ -200,20 +192,10 @@ export default function Login() {
 
           <div className="lg:hidden flex items-center gap-2 mb-8">
 
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs"
-              style={{
-                background:
-                  'var(--brand)',
-                color:
-                  '#0c0c12'
-              }}
-            >
-              LC
-            </div>
+            <img src="/logo.png" alt="The LetsCrackIT" className="h-9 w-9 rounded-xl object-cover" />
 
             <span className="font-display font-bold text-base text-primary">
-              LetsCrackIT
+              The Lets CrackIT
             </span>
 
           </div>
@@ -338,7 +320,7 @@ export default function Login() {
 
           <p className="text-center text-sm text-secondary mt-6">
 
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
 
             <Link
               to="/signup"
@@ -352,5 +334,6 @@ export default function Login() {
         </div>
       </div>
     </div>
+    </PageWrapper>
   )
 }

@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import AppRouter from './routes/AppRouter'
 import { getMe } from './app/slices/authSlice'
+import { GamificationProvider } from './hooks/useGamification'
+import { CelebrationOverlay } from './components/gamification/GamificationUI'
 
 export default function App() {
   const dispatch = useDispatch()
@@ -12,8 +14,11 @@ export default function App() {
   }, [dispatch, token])
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
-      <AppRouter />
-    </div>
+    <GamificationProvider>
+      <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+        <AppRouter />
+        <CelebrationOverlay />
+      </div>
+    </GamificationProvider>
   )
 }

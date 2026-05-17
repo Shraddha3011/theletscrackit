@@ -51,6 +51,10 @@ import {
 } from '../app/slices/uiSlice'
 
 import {
+  syncUserXp,
+} from '../app/slices/authSlice'
+
+import {
   Eye,
   Heart,
   Bookmark,
@@ -246,7 +250,7 @@ export default function NoteDetail() {
 
       })
 
-      .catch(() => { })
+      .catch(() => { /* ignore */ })
 
       .finally(() => {
 
@@ -269,7 +273,7 @@ export default function NoteDetail() {
           )
         })
 
-        .catch(() => { })
+        .catch(() => { /* ignore */ })
     }
 
   }, [
@@ -291,21 +295,31 @@ export default function NoteDetail() {
 
       try {
 
-        await markNoteCompleteApi(
+        const { data } = await markNoteCompleteApi(
           note.id
         )
 
         setCompleted(true)
 
         dispatch(
-          addToast({
-            type: 'success',
-            message:
-              `+${note.xpReward} XP Earned`,
+          syncUserXp({
+            xpPoints: data.xpPoints,
           })
         )
 
-      } catch { }
+        dispatch(
+          addToast({
+            type: 'success',
+            message:
+              data.xpEarned > 0
+                ? `+${data.xpEarned} XP Earned`
+                : 'Already completed',
+          })
+        )
+
+      } catch {
+        /* optional: surface toast on failure */
+      }
 
       setCompleting(false)
     }
@@ -326,7 +340,9 @@ export default function NoteDetail() {
           (p) => !p
         )
 
-      } catch { }
+      } catch {
+        /* bookmark toggle failed */
+      }
     }
 
   if (loading) {

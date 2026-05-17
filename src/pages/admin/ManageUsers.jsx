@@ -24,7 +24,7 @@ export default function ManageUsers() {
       const { data } = await getUsersApi()
 
       setUsers(Array.isArray(data) ? data : [])
-    } catch (err) {
+    } catch {
       setError('Unable to load users.')
     } finally {
       setLoading(false)

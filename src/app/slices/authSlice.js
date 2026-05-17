@@ -138,6 +138,24 @@ const authSlice = createSlice({
 
       state.error = null
     },
+
+    syncUserXp: (state, action) => {
+
+      if (!state.user) return
+
+      const {
+        xpPoints,
+        streak,
+      } = action.payload || {}
+
+      if (typeof xpPoints === 'number') {
+        state.user.xpPoints = xpPoints
+      }
+
+      if (typeof streak === 'number') {
+        state.user.streak = streak
+      }
+    },
   },
 
   extraReducers: (builder) => {
@@ -223,7 +241,8 @@ const authSlice = createSlice({
 
 export const {
   logout,
-  clearError
+  clearError,
+  syncUserXp,
 } = authSlice.actions
 
 export default authSlice.reducer

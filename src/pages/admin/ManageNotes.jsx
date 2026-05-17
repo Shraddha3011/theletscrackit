@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import PageWrapper from '../../components/layout/PageWrapper'
@@ -37,10 +37,6 @@ export default function ManageNotes() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
-  const selectedTopic = useMemo(() => {
-    return topics.find(t => String(t.id) === String(form.topicId))
-  }, [topics, form.topicId])
-
   const loadData = async () => {
 
     setLoading(true)
@@ -55,7 +51,7 @@ export default function ManageNotes() {
       setNotes(notesRes.data || [])
       setTopics(topicsRes.data || [])
 
-    } catch (err) {
+    } catch {
 
       setError('Unable to load notes.')
 

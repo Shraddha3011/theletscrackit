@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import {
   createQuizApi,
@@ -42,14 +42,7 @@ export default function ManageQuizzes() {
       })
   }, [])
 
-  /* FETCH QUIZZES */
-  useEffect(() => {
-    if (!selectedTopic) return
-
-    fetchQuizzes()
-  }, [selectedTopic])
-
-  const fetchQuizzes = () => {
+  const fetchQuizzes = useCallback(() => {
     getQuizApi(selectedTopic)
       .then(({ data }) => {
         setQuizzes(data || [])
@@ -57,7 +50,14 @@ export default function ManageQuizzes() {
       .catch(() => {
         setQuizzes([])
       })
-  }
+  }, [selectedTopic])
+
+  /* FETCH QUIZZES */
+  useEffect(() => {
+    if (!selectedTopic) return
+
+    fetchQuizzes()
+  }, [selectedTopic, fetchQuizzes])
 
   /* HANDLE INPUT */
   const handleChange = (e) => {

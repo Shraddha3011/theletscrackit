@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import {
   getCommentsApi,
@@ -18,14 +18,7 @@ export default function CommentSection({
   const [loading, setLoading] =
     useState(true)
 
-  /* FETCH COMMENTS */
-  useEffect(() => {
-    if (!noteId) return
-
-    fetchComments()
-  }, [noteId])
-
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       const { data } =
         await getCommentsApi(noteId)
@@ -37,7 +30,14 @@ export default function CommentSection({
     } finally {
       setLoading(false)
     }
-  }
+  }, [noteId])
+
+  /* FETCH COMMENTS */
+  useEffect(() => {
+    if (!noteId) return
+
+    fetchComments()
+  }, [noteId, fetchComments])
 
   /* POST COMMENT */
   const handleComment = async () => {
